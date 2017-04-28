@@ -22,30 +22,30 @@
             <div class="col-md-12">
                 <form id="sort" action="/" method="get">
                     <label class="radio-inline">
-                        <input v-on:click="getId" type="radio" name="sort" id="default" value="id" checked> default
+                        <input v-on:click="sort('default')" type="radio" name="sort" checked> default
                     </label>
                     <label class="radio-inline">
-                        <input v-on:click="getDate" type="radio" name="sort" id="date" value="date"> date
+                        <input v-on:click="sort('date')" type="radio" name="sort"> date
                     </label>
                     <label class="radio-inline">
-                        <input v-on:click="getPrice" type="radio" name="sort" id="price" value="price"> price
+                        <input v-on:click="sort('price')" type="radio" name="sort"> price
                     </label>
                     <label class="radio-inline">
-                        <input v-on:click="getTitle" type="radio" name="sort" id="title" value="title"> title
+                        <input v-on:click="sort('title')" type="radio" name="sort"> title
                     </label>
                 </form>
             </div>
         </div>
         <hr>
         <div class="row">
-            <ess JSAnno"col-md-3 text-center" v-for="product in products">
+            <div class="col-md-3 text-center" v-for="product in products">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h2 class="panel-title">{{ product.title }}</h2>
                     </div>
                     <div class="panel-body">
                         <h5 class="text-danger">{{ product.price }}</h5>
-                        <button class="btn btn-success">More info</button>
+                        <button class="btn btn-success" @click="moreInfo(product.id)">More info</button>
                     </div>
                     <div class="panel-footer">
                         {{ product.date }}
@@ -54,43 +54,98 @@
             </div>
         </div>
     </div>
+
+    <div class="modal-wrapper" v-if="showMoreInfo">
+        <div class="modal-content">
+            <div class="modal-close text-right">
+                <button class="btn btn-danger" @click="modalClose">Close</button>
+            </div>
+            <div class="modal-header text-center">
+                <h1>{{ singleProduct.title }}</h1>
+            </div>
+            <div class="modal-body text-center">
+                <h1 class="price text-danger">{{ singleProduct.price }}</h1>
+            </div>
+            <div class="modal-footer text-center">
+                <p class="date">{{ singleProduct.date }}</p>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+
 
 <!--suppress JSAnnotator -->
 <script>
+
+
     var app = new Vue({
         el: '#app',
         data: {
-            products: []
+            products: [],
+            showMoreInfo: false,
+            singleProduct: {}
         },
         methods: {
-            getId: function () {
-                this.fetchResponce('id');
-            },
-            fetchResponce: function (sort) {
-                this.$http.get('/getproducts.php?sort=' + sort).then(
-                    responce => {
-                        this.products = responce.body;
-                    }, responce => {
-                        console.log('error');
+            sort: function (sortMethod) {
+                this.$http.get('/getproducts.php?sort=' + sortMethod).then(
+                    function(success){
+                        this.products = success.body;
+                    },
+                    function(error){
+                        console.log(error);
                     }
                 );
             },
-            getTitle: function () {
-                this.fetchResponce('title');
+            moreInfo: function (id) {
+                this.getSingleProduct(id);
+                this.showMoreInfo = !this.showMoreInfo;
             },
-            getPrice: function () {
-                this.fetchResponce('price');
+            modalClose: function () {
+                this.singleProduct = null;
+                this.showMoreInfo = !this.showMoreInfo;
             },
-            getDate: function () {
-                this.fetchResponce('date');
+            getSingleProduct: function (id) {
+                this.$http.get('/getproducts.php?id=' + id).then(
+                    function (success) {
+                        this.singleProduct = success.body;
+                    },
+                    function (error) {
+                        console.log(error);
+                    }
+                );
             }
         },
         created: function () {
-            this.fetchResponce('id');
+            this.sort('id');
         }
     });
 </script>
+
+<style>
+    .btn,
+    .btn:focus,
+    .btn:active {
+        outline: none;
+    }
+    .modal-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,.5);
+        padding: 10em;
+    }
+    .modal-content {
+        background: #fff;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        padding: 2em;
+    }
+</style>
 
 </body>
 </html>

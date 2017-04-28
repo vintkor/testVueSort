@@ -53,24 +53,36 @@ $productsArray = [
 
 require_once "SortingProduct.php";
 
-( isset($_GET['sort']) ) ? $sort = $_GET['sort'] : $sort = null;
+if (isset($_GET['sort'])) {
 
-switch ($sort) {
-    case 'date':
-        $products = SortingProduct::getSortedProduct($productsArray, 'date');
-        break;
-    case 'price':
-        $products = SortingProduct::getSortedProduct($productsArray, 'price');
-        break;
-    case 'title':
-        $products = SortingProduct::getSortedProduct($productsArray, 'title');
-        break;
-    case 'id':
-        $products = SortingProduct::getSortedProduct($productsArray, 'id');
-        break;
-    default:
-        $products = SortingProduct::getSortedProduct($productsArray, 'id');
+    $sort = $_GET['sort'];
+    switch ($sort) {
+
+        case 'date':
+            $products = SortingProduct::getSortedProduct($productsArray, 'date');
+            break;
+        case 'price':
+            $products = SortingProduct::getSortedProduct($productsArray, 'price');
+            break;
+        case 'title':
+            $products = SortingProduct::getSortedProduct($productsArray, 'title');
+            break;
+        case 'id':
+            $products = SortingProduct::getSortedProduct($productsArray, 'id');
+            break;
+        default:
+            $products = SortingProduct::getSortedProduct($productsArray, 'id');
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode( $products );
+
+} elseif (isset($_GET['id'])) {
+
+    $id = $_GET['id'];
+    $product = SortingProduct::getSingle($productsArray, $id);
+
+    header('Content-Type: application/json');
+    echo json_encode( $product );
+
 }
-
-header('Content-Type: application/json');
-echo json_encode( $products );
